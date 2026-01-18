@@ -2,16 +2,15 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "npx nodemon server.js"
+    "dev": "npx nodemon server.js",
+    "mongo": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@overshoot/sdk": "^0.1.0-alpha.2",
     "cors": "^2.8.5",
@@ -19,7 +18,9 @@
     "express": "^5.2.1",
     "file-api": "^0.10.4",
     "mongodb": "^7.0.0",
+    "mongoose": "^9.1.4",
     "multer": "^2.0.2",
-    "node": "^25.3.0"
+    "node": "^25.3.0",
+    "zod": "^4.3.5"
   }
 }
