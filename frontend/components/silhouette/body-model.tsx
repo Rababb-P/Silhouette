@@ -175,15 +175,21 @@ export function BodyModel({
   }
 
   const handleSave = async () => {
+    console.log('[PREFERENCES_SAVE] Starting save preferences...')
+    console.log('[PREFERENCES_SAVE] Annotations count:', annotations.length)
+    console.log('[PREFERENCES_SAVE] Annotations:', annotations)
+    
     try {
       // Convert annotations to preferences format
       const preferences = annotations.map(ann => ({
         bodyPart: ann.bodyPart,
         comment: ann.comment
       }))
+      console.log('[PREFERENCES_SAVE] Converted to preferences format:', preferences)
 
-      // Send to backend
-      const response = await fetch('http://localhost:3000/api/preferences', {
+      // Send to backend - use relative URL to allow Next.js rewrites to handle proxying
+      console.log('[PREFERENCES_SAVE] Sending preferences to backend...')
+      const response = await fetch('/api/preferences', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,23 +198,39 @@ export function BodyModel({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save preferences')
+        const errorText = await response.text()
+        let errorMessage = 'Failed to save preferences'
+        try {
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.error || errorJson.message || errorMessage
+        } catch {
+          errorMessage = errorText || errorMessage
+        }
+        console.error('[PREFERENCES_SAVE] Preferences save error:', response.status, errorMessage)
+        throw new Error(errorMessage)
       }
 
       const saved = await response.json()
-      console.log('Preferences saved:', saved)
+      console.log('[PREFERENCES_SAVE] Preferences saved successfully:', saved)
+      console.log('[PREFERENCES_SAVE] Saved files:', {
+        json: saved.preferences?.timestamp,
+        text: 'latest.txt'
+      })
 
       // Notify parent component
       if (onSavePreferences) {
+        console.log('[PREFERENCES_SAVE] Notifying parent component...')
         onSavePreferences(preferences)
       }
 
       // Show success feedback
+      console.log('[PREFERENCES_SAVE] Save completed successfully')
       setIsSaved(true)
       setTimeout(() => setIsSaved(false), 2000)
     } catch (error) {
-      console.error('Failed to save preferences:', error)
-      alert('Failed to save preferences. Please try again.')
+      console.error('[PREFERENCES_SAVE] Failed to save preferences:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save preferences. Please try again.'
+      alert(errorMessage)
     }
   }
 

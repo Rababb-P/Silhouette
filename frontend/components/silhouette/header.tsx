@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Menu, User } from "lucide-react"
+import { Menu, User, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -9,8 +9,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
-export function Header() {
+interface HeaderProps {
+  onGenerate?: () => void
+  isGenerating?: boolean
+}
+
+export function Header({ onGenerate, isGenerating = false }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1800px] items-center justify-center px-4 lg:px-8">
@@ -34,6 +40,43 @@ export function Header() {
 
         {/* Right Actions */}
         <div className="absolute right-4 lg:right-8 flex items-center gap-2">
+          {/* Generate Button */}
+          {onGenerate && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={onGenerate}
+                    disabled={isGenerating}
+                    variant={isGenerating ? "default" : "outline"}
+                    size="sm"
+                    className={cn(
+                      "gap-2 transition-all duration-300",
+                      isGenerating && "bg-emerald-600 hover:bg-emerald-700 text-background"
+                    )}
+                  >
+                    <Sparkles className={cn(
+                      "h-4 w-4 transition-all duration-300",
+                      isGenerating && "animate-spin"
+                    )} />
+                    <span className="hidden sm:inline">
+                      {isGenerating ? "Generating..." : "Generate"}
+                    </span>
+                    <span className="sr-only">
+                      {isGenerating ? "Generating photo with Gemini" : "Generate photo with Gemini"}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="bottom" 
+                  className="tooltip-content text-foreground"
+                >
+                  <p>{isGenerating ? "Generating with Gemini..." : "Generate photo with Gemini AI"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>

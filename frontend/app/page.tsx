@@ -16,6 +16,8 @@ export default function SilhouettePage() {
   const [preferences, setPreferences] = useState<{ bodyPart: string, comment: string }[]>([])
   const [generatedOutfits, setGeneratedOutfits] = useState<any[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null)
+  const [isGeneratingPhoto, setIsGeneratingPhoto] = useState(false)
 
   const handleAddAnnotation = (bodyPart: string, comment: string) => {
     console.log("Adding annotation for body part:", bodyPart, "Comment:", comment)
@@ -61,16 +63,57 @@ export default function SilhouettePage() {
     }
   }
 
+  // Generate photo using text files + image via Gemini
+  const generatePhoto = async () => {
+    console.log('[GENERATE_PHOTO] Starting photo generation...')
+    console.log('[GENERATE_PHOTO] Current state - hasCaptureData:', !!captureData, 'hasPreferences:', preferences.length > 0)
+    setIsGeneratingPhoto(true)
+    try {
+      console.log('[GENERATE_PHOTO] Requesting photo generation from backend...')
+      const response = await fetch('/api/capture/generate-photo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(errorText || 'Failed to generate photo')
+      }
+
+      const data = await response.json()
+      console.log('[GENERATE_PHOTO] Photo generated successfully:', data)
+      console.log('[GENERATE_PHOTO] Generated image filename:', data.image?.filename)
+      console.log('[GENERATE_PHOTO] Image path:', data.image?.path)
+      
+      if (data.image?.dataUrl) {
+        console.log('[GENERATE_PHOTO] Setting generated photo in state...')
+        setGeneratedPhoto(data.image.dataUrl)
+        console.log('[GENERATE_PHOTO] Photo generation completed successfully')
+      } else {
+        console.warn('[GENERATE_PHOTO] No image data URL in response')
+      }
+    } catch (error) {
+      console.error('[GENERATE_PHOTO] Failed to generate photo:', error)
+      alert('Failed to generate photo. Make sure you have saved both a capture and preferences first.')
+    } finally {
+      setIsGeneratingPhoto(false)
+    }
+  }
+
   // Handle capture from camera preview
   const handleCapture = (data: { snapshot: string, overshootData: any }) => {
     console.log('Capture received:', data)
     setCaptureData(data)
+    // Photo generation is now manual - only when user clicks Generate button
   }
 
   // Handle preferences saved from body model
   const handleSavePreferences = (prefs: { bodyPart: string, comment: string }[]) => {
     console.log('Preferences saved:', prefs)
     setPreferences(prefs)
+    // Photo generation is now manual - only when user clicks Generate button
   }
 
   // Generate recommendations when all data is available
@@ -83,7 +126,7 @@ export default function SilhouettePage() {
     setIsGenerating(true)
 
     try {
-      const response = await fetch('http://localhost:3000/api/recommendation', {
+      const response = await fetch('/api/recommendation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,22 +158,15 @@ export default function SilhouettePage() {
     }
   }
 
-  // Auto-generate recommendations when capture and preferences are available
-  useEffect(() => {
-    if (captureData && selectedVibe && selectedVibe !== 'manual') {
-      // Wait a bit for preferences to be saved
-      const timer = setTimeout(() => {
-        generateRecommendations()
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [captureData, selectedVibe, preferences.length])
+  // Recommendations generation is now manual - only when user clicks Generate button in OutfitPreviews
+  // Removed auto-generation useEffect to prevent unwanted generation on save
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
+      <Header 
+        onGenerate={generatePhoto}
+        isGenerating={isGeneratingPhoto}
+      />
       
       <div className="mx-auto max-w-[1800px] px-4 py-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-2">
@@ -179,6 +215,29 @@ export default function SilhouettePage() {
               onGenerate={generateRecommendations}
             />
           </div>
+
+          {/* Generated Photo Display */}
+          {generatedPhoto && (
+            <div className="mt-6 w-full">
+              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
+                <h2 className="font-serif text-lg text-foreground mb-4">Generated Photo (Gemini)</h2>
+                <div className="aspect-[3/4] overflow-hidden rounded-xl border border-border/50 bg-muted">
+                  <img 
+                    src={generatedPhoto} 
+                    alt="Generated fashion photo" 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <button
+                  onClick={generatePhoto}
+                  disabled={isGeneratingPhoto}
+                  className="mt-4 px-4 py-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
+                >
+                  {isGeneratingPhoto ? 'Generating...' : 'Regenerate Photo'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

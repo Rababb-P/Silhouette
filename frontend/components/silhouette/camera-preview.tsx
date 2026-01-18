@@ -175,18 +175,31 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
   }
 
   const captureSnapshot = async () => {
-    if (!videoRef.current || !isStreaming || !lastOvershootData) {
-      console.warn('Cannot capture: camera not streaming or no Overshoot data')
+    console.log('[CAMERA_SAVE] Starting capture snapshot...')
+    console.log('[CAMERA_SAVE] Check - isStreaming:', isStreaming, 'hasOvershootData:', !!lastOvershootData)
+    
+    if (!videoRef.current || !isStreaming) {
+      console.warn('[CAMERA_SAVE] Cannot capture: camera not streaming')
+      alert('Please start the camera first')
       return
     }
 
+    if (!lastOvershootData) {
+      console.warn('[CAMERA_SAVE] Cannot capture: no Overshoot analysis data available')
+      alert('Please analyze your outfit first by clicking the scan button')
+      return
+    }
+
+    console.log('[CAMERA_SAVE] All conditions met, starting capture...')
     setIsCapturing(true)
 
     try {
       // Create canvas to capture video frame
+      console.log('[CAMERA_SAVE] Creating canvas for video capture...')
       const canvas = canvasRef.current || document.createElement('canvas')
       canvas.width = videoRef.current.videoWidth
       canvas.height = videoRef.current.videoHeight
+      console.log('[CAMERA_SAVE] Canvas size:', canvas.width, 'x', canvas.height)
       
       const ctx = canvas.getContext('2d')
       if (!ctx) {
@@ -194,19 +207,26 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
       }
 
       // Draw current video frame to canvas
+      console.log('[CAMERA_SAVE] Drawing video frame to canvas...')
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
       
       // Convert canvas to base64 image
       const snapshot = canvas.toDataURL('image/png')
+      console.log('[CAMERA_SAVE] Snapshot created, size:', snapshot.length, 'chars')
 
       // Prepare data to send
       const captureData = {
         snapshot,
         overshootData: lastOvershootData
       }
+      console.log('[CAMERA_SAVE] Capture data prepared:', { 
+        hasSnapshot: !!captureData.snapshot, 
+        overshootData: captureData.overshootData 
+      })
 
-      // Send to backend to save
-      const response = await fetch('http://localhost:3000/api/capture', {
+      // Send to backend to save - use relative URL to allow Next.js rewrites to handle proxying
+      console.log('[CAMERA_SAVE] Sending capture data to backend...')
+      const response = await fetch('/api/capture', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -215,22 +235,35 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save capture')
+        const errorText = await response.text()
+        let errorMessage = 'Failed to save capture'
+        try {
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.error || errorJson.message || errorMessage
+        } catch {
+          errorMessage = errorText || errorMessage
+        }
+        console.error('Capture save error:', response.status, errorMessage)
+        throw new Error(errorMessage)
       }
 
       const savedData = await response.json()
-      console.log('Capture saved:', savedData)
+      console.log('[CAMERA_SAVE] Capture saved successfully:', savedData)
+      console.log('[CAMERA_SAVE] Saved file:', savedData.capture?.snapshotPath)
 
       // Notify parent component
       if (onCapture) {
+        console.log('[CAMERA_SAVE] Notifying parent component...')
         onCapture(captureData)
       }
 
       // Show success feedback
+      console.log('[CAMERA_SAVE] Save completed successfully')
       alert('Capture saved successfully!')
     } catch (error) {
-      console.error('Capture failed:', error)
-      alert('Failed to capture. Please try again.')
+      console.error('[CAMERA_SAVE] Capture failed:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to capture. Please try again.'
+      alert(errorMessage)
     } finally {
       setIsCapturing(false)
     }

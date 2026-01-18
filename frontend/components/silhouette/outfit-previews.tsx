@@ -10,7 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 
 interface OutfitPreviewsProps {
   selectedVibe: string

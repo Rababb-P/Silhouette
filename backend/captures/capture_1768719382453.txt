@@ -1,0 +1,7 @@
+Camera Capture Analysis:
+
+Image: capture_1768719382453.png
+Overshoot Analysis Data:
+"No results"
+
+Saved at: 2026-01-18T06:56:22.454Z

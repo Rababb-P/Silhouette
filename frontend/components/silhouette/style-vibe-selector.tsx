@@ -1,7 +1,9 @@
 "use client"
 
-import { Flame, Briefcase, Zap, Edit3 } from "lucide-react"
+import { useState } from "react"
+import { Flame, Briefcase, Zap, Edit3, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
@@ -46,13 +48,90 @@ const vibes = [
 ]
 
 export function StyleVibeSelector({ selectedVibe, onVibeSelect }: StyleVibeSelectorProps) {
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async () => {
+    console.log('[STYLE_VIBE_SAVE] Starting save style vibe...')
+    console.log('[STYLE_VIBE_SAVE] Selected vibe:', selectedVibe)
+    setIsSaving(true)
+    try {
+      console.log('[STYLE_VIBE_SAVE] Sending style vibe to backend...')
+      const response = await fetch('/api/preferences/style-vibe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ styleVibe: selectedVibe }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = 'Failed to save style vibe'
+        try {
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.error || errorJson.message || errorMessage
+        } catch {
+          errorMessage = errorText || errorMessage
+        }
+        console.error('Style vibe save error:', response.status, errorMessage)
+        throw new Error(errorMessage)
+      }
+
+      const saved = await response.json()
+      console.log('[STYLE_VIBE_SAVE] Style vibe saved successfully:', saved)
+      console.log('[STYLE_VIBE_SAVE] Saved files:', {
+        json: saved.styleVibe?.timestamp,
+        text: 'latest_style_vibe.txt'
+      })
+
+      // Show success feedback
+      console.log('[STYLE_VIBE_SAVE] Save completed successfully')
+      setIsSaved(true)
+      setTimeout(() => setIsSaved(false), 2000)
+    } catch (error) {
+      console.error('[STYLE_VIBE_SAVE] Failed to save style vibe:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save style vibe. Please try again.'
+      alert(errorMessage)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-serif text-lg text-foreground">Style Vibe</h2>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
-          Select one
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+            Select one
+          </span>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isSaved ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "gap-2 transition-all duration-300",
+                    isSaved && "bg-emerald-600 hover:bg-emerald-700"
+                  )}
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  <Check className={cn(
+                    "h-4 w-4 transition-all duration-300",
+                    isSaved && "scale-110"
+                  )} />
+                  {isSaved ? "Saved" : isSaving ? "Saving..." : "Save"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="tooltip-content text-foreground">
+                <p>Save style vibe preference</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
