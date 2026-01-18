@@ -10,32 +10,41 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { RealtimeVision } from '@overshoot/sdk'
 
 interface CameraPreviewProps {
   selectedVibe: string
+  selectedItem?: string
 }
 
-export function CameraPreview({ selectedVibe }: CameraPreviewProps) {
+export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
 
   const startCamera = async () => {
     try {
+      console.log('Requesting camera access...')
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: 1280, height: 720 }
       })
+      console.log('Camera stream obtained:', stream)
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
         setIsStreaming(true)
+        console.log('Camera started successfully')
         
         // Simulate analysis after camera starts
         setTimeout(() => {
           setIsAnalyzing(true)
           setTimeout(() => setIsAnalyzing(false), 2000)
         }, 1000)
+      } else {
+        console.error('Video element not found')
       }
     } catch (err) {
       console.log("Camera access denied or not available:", err)
@@ -48,6 +57,99 @@ export function CameraPreview({ selectedVibe }: CameraPreviewProps) {
       streamRef.current = null
       setIsStreaming(false)
     }
+  }
+
+  const analyzeStyle = async () => {
+    if (!streamRef.current) return
+
+    setIsAnalyzing(true)
+    chunksRef.current = []
+
+    recorderRef.current = new MediaRecorder(streamRef.current, {
+      mimeType: 'video/mp4'
+    })
+
+    recorderRef.current.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunksRef.current.push(event.data)
+      }
+    }
+
+    recorderRef.current.onstop = async () => {
+      console.log('Starting analysis with selectedItem:', selectedItem, 'selectedVibe:', selectedVibe)
+      
+      const blob = new Blob(chunksRef.current, { type: 'video/mp4' })
+      const videoFile = new File([blob], 'capture.mp4', { type: 'video/mp4' })
+
+      const results = []
+
+      // Create dynamic prompt based on selections
+      const itemLabels = ['shoes', 'tops', 'bottoms']
+      const styleLabels = ['formal', 'streetwear', 'active']
+      
+      const selectedItemLabel = selectedItem && itemLabels.includes(selectedItem) ? selectedItem : null
+      const selectedStyleLabel = selectedVibe && styleLabels.includes(selectedVibe) ? selectedVibe : null
+
+      console.log('Selected item label:', selectedItemLabel, 'Selected style label:', selectedStyleLabel)
+
+      let prompt = 'Analyze the person\'s style and body type.'
+      
+      if (selectedItemLabel) {
+        prompt = `Analyze the person's ${selectedItemLabel} and body type. Focus specifically on their ${selectedItemLabel}.`
+      }
+      
+      if (selectedStyleLabel) {
+        prompt += ` Consider ${selectedStyleLabel} style preferences.`
+      }
+
+      prompt += ` Output a JSON object with exactly three properties: "colour" (string describing the dominant color), "style" (must be one of: formal, streetwear, active), "item" (must be one of: shoes, tops, bottoms).`
+      
+      if (selectedItemLabel) {
+        prompt += ` Set "item" to "${selectedItemLabel}".`
+      }
+      
+      if (selectedStyleLabel) {
+        prompt += ` Set "style" to "${selectedStyleLabel}".`
+      }
+      
+      prompt += ' Choose appropriate values to change their outfit and make them look nice.'
+
+      console.log('Generated prompt:', prompt)
+
+      const vision = new RealtimeVision({
+        apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
+        apiKey: 'ovs_cc96a9b34f5fa6805c6579f6f50c9aa0',
+        prompt: prompt,
+        model: 'Qwen/Qwen3-VL-8B-Instruct',
+        source: { type: 'video', file: videoFile },
+        onResult: (result) => {
+          console.log('Realtime result:', result.result)
+          results.push(result.result)
+        }
+      })
+
+      try {
+        await vision.start()
+        // Wait for processing to complete
+        setTimeout(async () => {
+          await vision.stop()
+          const finalResult = results[results.length - 1] || 'No results'
+          console.log('Final analysis result:', finalResult)
+          // Here you can update state or pass to parent component
+          setIsAnalyzing(false)
+        }, 5000)
+      } catch (error) {
+        console.error('Analysis failed:', error)
+        setIsAnalyzing(false)
+      }
+    }
+
+    recorderRef.current.start()
+    setTimeout(() => {
+      if (recorderRef.current) {
+        recorderRef.current.stop()
+      }
+    }, 2000)
   }
 
   useEffect(() => {
@@ -67,15 +169,17 @@ export function CameraPreview({ selectedVibe }: CameraPreviewProps) {
       {/* Main Preview Container */}
       <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-border/50 bg-card">
         {/* Video/Placeholder */}
-        {isStreaming ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="h-full w-full object-cover"
-          />
-        ) : (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className={cn(
+            "h-full w-full object-cover",
+            !isStreaming && "hidden"
+          )}
+        />
+        {!isStreaming && (
           <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-b from-muted/50 to-background">
             <div className="relative mb-6">
               <div className="h-32 w-24 rounded-full border-2 border-dashed border-muted-foreground/30" />
@@ -138,68 +242,68 @@ export function CameraPreview({ selectedVibe }: CameraPreviewProps) {
         )}
 
         {/* Bottom Controls */}
-        {isStreaming && (
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all duration-300"
-                    onClick={() => {
-                      setIsAnalyzing(true)
-                      setTimeout(() => setIsAnalyzing(false), 2000)
-                    }}
-                  >
-                    <Scan className="h-4 w-4" />
-                    <span className="sr-only">Analyze</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="tooltip-content text-foreground">
-                  <p>Analyze outfit</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all duration-300"
+                  onClick={analyzeStyle}
+                  disabled={!isStreaming || isAnalyzing}
+                >
+                  <Scan className="h-4 w-4" />
+                  <span className="sr-only">Analyze</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="tooltip-content text-foreground">
+                <p>{!isStreaming ? "Start camera first" : isAnalyzing ? "Analyzing..." : "Analyze outfit"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="h-12 w-12 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300"
-                    onClick={stopCamera}
-                  >
-                    <CameraOff className="h-5 w-5" />
-                    <span className="sr-only">Stop camera</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="tooltip-content text-foreground">
-                  <p>Stop camera</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {isStreaming && (
+            <>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-12 w-12 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300"
+                      onClick={stopCamera}
+                    >
+                      <CameraOff className="h-5 w-5" />
+                      <span className="sr-only">Stop camera</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="tooltip-content text-foreground">
+                    <p>Stop camera</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all duration-300"
-                  >
-                    <Maximize2 className="h-4 w-4" />
-                    <span className="sr-only">Fullscreen</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="tooltip-content text-foreground">
-                  <p>Fullscreen</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all duration-300"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                      <span className="sr-only">Fullscreen</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="tooltip-content text-foreground">
+                    <p>Fullscreen</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Camera Switch (for mobile) */}
