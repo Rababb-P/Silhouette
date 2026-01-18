@@ -48,6 +48,7 @@ export function StyleRecommendation({ selectedVibe, selectedBodyPart }: StyleRec
   const [isCopied, setIsCopied] = useState(false)
   const [currentRecommendation, setCurrentRecommendation] = useState("")
   const [displayedText, setDisplayedText] = useState("")
+  const [manualStyle, setManualStyle] = useState("")
 
   const getRecommendation = () => {
     const vibeRecs = recommendations[selectedVibe] || recommendations.street
@@ -102,8 +103,45 @@ export function StyleRecommendation({ selectedVibe, selectedBodyPart }: StyleRec
     setTimeout(() => setIsCopied(false), 2000)
   }
 
+  // Manual mode - show free text input
+  if (selectedVibe === "manual") {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
+              <Sparkles className="h-4 w-4 text-foreground" />
+            </div>
+            <h2 className="font-serif text-lg text-foreground">Add Your Style</h2>
+          </div>
+        </div>
+
+        {/* Free Text Input */}
+        <div className="relative rounded-xl border border-border/30 bg-background/50 p-4">
+          <textarea
+            value={manualStyle}
+            onChange={(e) => setManualStyle(e.target.value)}
+            placeholder="Describe your personal style, preferences, or any specific looks you want to achieve..."
+            className="w-full min-h-[120px] resize-none bg-transparent text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          
+          {/* Character count */}
+          <div className="mt-2 flex justify-end">
+            <span className="text-xs text-muted-foreground">
+              {manualStyle.length} characters
+            </span>
+          </div>
+
+          {/* Subtle corner accent */}
+          <div className="absolute -right-px -top-px h-4 w-4 border-r border-t border-foreground/20 rounded-tr-xl" />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
