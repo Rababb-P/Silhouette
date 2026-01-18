@@ -1,6 +1,6 @@
 Camera Capture Analysis:
 
-Image: capture_1768730615828.png
+Image: capture_1768730468669.png
 Overshoot Analysis Data:
 {
   "colour": "urban black",
@@ -8,4 +8,4 @@ Overshoot Analysis Data:
   "item": "tops"
 }
 
-Saved at: 2026-01-18T10:03:35.829Z
+Saved at: 2026-01-18T10:01:08.670Z

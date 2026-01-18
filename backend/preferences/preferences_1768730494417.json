@@ -1,0 +1,22 @@
+{
+  "timestamp": 1768730494417,
+  "preferences": [
+    {
+      "bodyPart": "head",
+      "comment": "Bald"
+    },
+    {
+      "bodyPart": "head",
+      "comment": "Glasses"
+    },
+    {
+      "bodyPart": "torso",
+      "comment": "Necklace"
+    },
+    {
+      "bodyPart": "torso",
+      "comment": "Tie"
+    }
+  ],
+  "createdAt": "2026-01-18T10:01:34.417Z"
+}

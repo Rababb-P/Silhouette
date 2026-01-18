@@ -155,10 +155,13 @@ Format your response as JSON:
 
     // Generate images for each recommendation
     const generatedImages = []
-    const base64Snapshot = captureData.snapshot.replace(/^data:image\/\w+;base64,/, '')
-    const snapshotBuffer = Buffer.from(base64Snapshot, 'base64')
+    
+    // Only generate images if we have a snapshot
+    if (captureData && captureData.snapshot) {
+      const base64Snapshot = captureData.snapshot.replace(/^data:image\/\w+;base64,/, '')
+      const snapshotBuffer = Buffer.from(base64Snapshot, 'base64')
 
-    for (let i = 0; i < Math.min(recommendations.length, 2); i++) {
+      for (let i = 0; i < Math.min(recommendations.length, 2); i++) {
       const rec = recommendations[i]
       
       // Build image generation prompt with base prompt
@@ -202,6 +205,9 @@ Make it look realistic and fashionable. Keep the person's face and body proporti
         console.error(`Failed to generate image for recommendation ${i + 1}:`, imageError)
         // Continue with other recommendations
       }
+    }
+    } else {
+      console.log('No capture data available, skipping image generation')
     }
 
     res.json({

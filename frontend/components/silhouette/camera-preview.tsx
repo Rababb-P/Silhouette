@@ -68,6 +68,26 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
     if (!streamRef.current) return
 
     setIsAnalyzing(true)
+    
+    // Check for browser compatibility with captureStream
+    const testVideo = document.createElement('video')
+    const hasCaptureStream = typeof testVideo.captureStream === 'function' || 
+                             typeof (testVideo as any).mozCaptureStream === 'function'
+    
+    if (!hasCaptureStream) {
+      console.warn('Browser does not support video.captureStream(). Using fallback mode.')
+      // Fallback: Create mock analysis data
+      const mockData = {
+        colour: selectedVibe === 'formal' ? 'navy blue' : selectedVibe === 'sporty' ? 'athletic gray' : 'urban black',
+        style: selectedVibe === 'formal' ? 'formal' : selectedVibe === 'sporty' ? 'active' : 'streetwear',
+        item: selectedItem || 'tops'
+      }
+      setLastOvershootData(mockData)
+      setIsAnalyzing(false)
+      console.log('Using fallback analysis data:', mockData)
+      return
+    }
+    
     chunksRef.current = []
 
     recorderRef.current = new MediaRecorder(streamRef.current, {
@@ -121,20 +141,20 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
 
       console.log('Generated prompt:', prompt)
 
-      // Get API key from environment or use backend endpoint
-      const vision = new RealtimeVision({
-        apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
-        apiKey: process.env.NEXT_PUBLIC_OVERSHOOT_API_KEY || 'ovs_cc96a9b34f5fa6805c6579f6f50c9aa0',
-        prompt: prompt,
-        model: 'Qwen/Qwen3-VL-8B-Instruct',
-        source: { type: 'video', file: videoFile },
-        onResult: (result: any) => {
-          console.log('Realtime result:', result.result)
-          results.push(result.result)
-        }
-      })
-
       try {
+        // Get API key from environment or use backend endpoint
+        const vision = new RealtimeVision({
+          apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
+          apiKey: process.env.NEXT_PUBLIC_OVERSHOOT_API_KEY || 'ovs_cc96a9b34f5fa6805c6579f6f50c9aa0',
+          prompt: prompt,
+          model: 'Qwen/Qwen3-VL-8B-Instruct',
+          source: { type: 'video', file: videoFile },
+          onResult: (result: any) => {
+            console.log('Realtime result:', result.result)
+            results.push(result.result)
+          }
+        })
+
         await vision.start()
         // Wait for processing to complete
         setTimeout(async () => {
@@ -160,8 +180,15 @@ export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraP
           
           setIsAnalyzing(false)
         }, 5000)
-      } catch (error) {
-        console.error('Analysis failed:', error)
+      } catch (visionError) {
+        console.error('Vision analysis failed:', visionError)
+        // Fallback data on vision error
+        const fallbackData = {
+          colour: 'neutral',
+          style: selectedVibe === 'formal' ? 'formal' : selectedVibe === 'sporty' ? 'active' : 'streetwear',
+          item: selectedItem || 'tops'
+        }
+        setLastOvershootData(fallbackData)
         setIsAnalyzing(false)
       }
     }
