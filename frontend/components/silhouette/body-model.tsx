@@ -378,7 +378,7 @@ export function BodyModel({
 
             {/* Left Arm */}
             <path
-              d="M60 90 L40 100 L25 160 L35 165 L55 115 L60 120"
+              d="M60 90 L40 100 L20 180 L30 185 L55 115 L60 120"
               className={cn(
                 "transition-all duration-300 cursor-pointer",
                 selectedBodyPart === "arms"
@@ -406,7 +406,7 @@ export function BodyModel({
 
             {/* Right Arm */}
             <path
-              d="M140 90 L160 100 L175 160 L165 165 L145 115 L140 120"
+              d="M140 90 L160 100 L180 180 L170 185 L145 115 L140 120"
               className={cn(
                 "transition-all duration-300 cursor-pointer",
                 selectedBodyPart === "arms"

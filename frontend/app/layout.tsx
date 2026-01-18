@@ -6,25 +6,12 @@ import "./globals.css"
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-poppins" })
 
 export const metadata: Metadata = {
-  title: "Silhouette | AI-Powered Virtual Try-On",
+  title: "Silhouette",
   description:
     "Experience the future of fashion with AI-powered virtual try-on. See yourself in any outfit instantly.",
   generator: "silhouette",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
+    icon: "/ico.svg",
     apple: "/apple-icon.png",
   },
 }

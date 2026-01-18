@@ -62,9 +62,9 @@ export default function SilhouettePage() {
       <Header />
       
       <div className="mx-auto max-w-[1800px] px-4 py-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Left Column - Camera Preview */}
-          <div className="lg:col-span-5">
+          <div>
             <CameraPreview 
               selectedVibe={getSelectedVibe()} 
               selectedItem={getSelectedItem()}
