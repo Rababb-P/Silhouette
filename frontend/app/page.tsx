@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Header } from "@/components/silhouette/header"
 import { CameraPreview } from "@/components/silhouette/camera-preview"
 import { StyleVibeSelector } from "@/components/silhouette/style-vibe-selector"
-import { OutfitPreviews } from "@/components/silhouette/outfit-previews"
 import { StyleRecommendation } from "@/components/silhouette/style-recommendation"
 import { BodyModel, type Annotation } from "@/components/silhouette/body-model"
 
@@ -18,6 +17,7 @@ export default function SilhouettePage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null)
   const [isGeneratingPhoto, setIsGeneratingPhoto] = useState(false)
+  const [textRecommendation, setTextRecommendation] = useState<string>("")
 
   const handleAddAnnotation = (bodyPart: string, comment: string) => {
     console.log("Adding annotation for body part:", bodyPart, "Comment:", comment)
@@ -118,10 +118,6 @@ export default function SilhouettePage() {
 
   // Generate recommendations when all data is available
   const generateRecommendations = async () => {
-    if (!captureData) {
-      alert('Please capture an image first')
-      return
-    }
 
     setIsGenerating(true)
 
@@ -148,6 +144,11 @@ export default function SilhouettePage() {
       // Update generated outfits
       if (data.generatedImages && data.generatedImages.length > 0) {
         setGeneratedOutfits(data.generatedImages)
+      }
+
+      // Store text recommendation
+      if (data.textRecommendation) {
+        setTextRecommendation(data.textRecommendation)
       }
 
     } catch (error) {
@@ -192,7 +193,7 @@ export default function SilhouettePage() {
           </div>
         </div>
 
-        {/* Bottom Row - Style Controls and Outfit Previews */}
+        {/* Bottom Row - Style Controls */}
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* Left Column - Style Controls Stacked */}
           <div className="flex flex-col gap-6">
@@ -206,19 +207,10 @@ export default function SilhouettePage() {
             />
           </div>
 
-          {/* Right Column - Outfit Previews */}
-          <div className="lg:col-span-2 h-full">
-            <OutfitPreviews 
-              selectedVibe={selectedVibe} 
-              generatedOutfits={generatedOutfits}
-              isGenerating={isGenerating}
-              onGenerate={generateRecommendations}
-            />
-          </div>
-
           {/* Generated Photo Display */}
           {generatedPhoto && (
-            <div className="mt-6 w-full">
+            <div className="lg:col-span-2 grid gap-6 lg:grid-cols-2">
+              {/* Photo Section */}
               <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
                 <h2 className="font-serif text-lg text-foreground mb-4">Generated Photo (Gemini)</h2>
                 <div className="aspect-[3/4] overflow-hidden rounded-xl border border-border/50 bg-muted">
@@ -235,6 +227,30 @@ export default function SilhouettePage() {
                 >
                   {isGeneratingPhoto ? 'Generating...' : 'Regenerate Photo'}
                 </button>
+              </div>
+
+              {/* Text Recommendation Section */}
+              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-serif text-lg text-foreground">Styling Recommendations</h2>
+                  <button
+                    onClick={generateRecommendations}
+                    disabled={isGenerating}
+                    className="px-3 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 text-sm font-medium"
+                  >
+                    {isGenerating ? 'Generating...' : 'Generate'}
+                  </button>
+                </div>
+                {textRecommendation && (
+                  <div className="flex-1 text-sm text-muted-foreground leading-relaxed overflow-y-auto">
+                    {textRecommendation}
+                  </div>
+                )}
+                {!textRecommendation && !isGenerating && (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <p className="text-sm">Click Generate to see recommendations</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

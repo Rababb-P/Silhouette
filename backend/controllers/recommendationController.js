@@ -53,9 +53,7 @@ const generateRecommendation = async (req, res) => {
       console.warn('Could not load capture data:', error.message)
     }
 
-    if (!captureData) {
-      return res.status(400).json({ error: 'No capture data found. Please capture an image first.' })
-    }
+    // Capture data is now optional - user can generate recommendations without it
 
     // Get latest preferences
     let preferences = []

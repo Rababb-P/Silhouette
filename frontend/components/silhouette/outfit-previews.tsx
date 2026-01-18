@@ -22,6 +22,7 @@ interface OutfitPreviewsProps {
   }>
   isGenerating?: boolean
   onGenerate?: () => void
+  textRecommendation?: string
 }
 
 const outfitsByVibe = {
@@ -39,7 +40,7 @@ const outfitsByVibe = {
   ],
 }
 
-export function OutfitPreviews({ selectedVibe, generatedOutfits = [], isGenerating = false, onGenerate }: OutfitPreviewsProps) {
+export function OutfitPreviews({ selectedVibe, generatedOutfits = [], isGenerating = false, onGenerate, textRecommendation }: OutfitPreviewsProps) {
   const [playingId, setPlayingId] = useState<number | null>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
@@ -259,6 +260,16 @@ export function OutfitPreviews({ selectedVibe, generatedOutfits = [], isGenerati
           )
         })}
       </div>
+
+      {/* Gemini Text Recommendation */}
+      {textRecommendation && (
+        <div className="mt-5 pt-5 border-t border-border/30">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Styling Recommendations</h3>
+          <div className="text-sm text-muted-foreground leading-relaxed max-h-32 overflow-y-auto">
+            {textRecommendation}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
