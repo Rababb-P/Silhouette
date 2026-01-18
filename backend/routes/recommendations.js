@@ -4,5 +4,6 @@ const recommendationController = require('../controllers/recommendationControlle
 
 // Recommendation routes
 router.post('/recommendation', recommendationController.generateRecommendation)
+router.post('/recommendation/photo', recommendationController.generateRecommendationPhoto)
 
 module.exports = router

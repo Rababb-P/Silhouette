@@ -100,6 +100,12 @@
     overflow-x: hidden;
   }
   
+  /* Apply Poppins font to all buttons */
+  button {
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
+    font-style: normal;
+  }
+  
   /* Animated dots background */
   body::before {
     content: '';
@@ -163,6 +169,28 @@
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
@@ -179,6 +207,75 @@
 
 .animate-scan-line {
   animation: scan-line 3s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
+}
+
+.animate-fade-in-delay {
+  animation: fade-in 1s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+}
+
+/* Animated text character effects */
+:root {
+  --lerp-0: 1;
+  --lerp-1: calc(sin(50deg));
+  --lerp-2: calc(sin(45deg));
+  --lerp-3: calc(sin(35deg));
+  --lerp-4: calc(sin(25deg));
+  --lerp-5: calc(sin(15deg));
+}
+
+.animated-text {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.char {
+  display: flex;
+  cursor: pointer;
+  padding: 0 0.1em;
+}
+
+.char:focus-visible {
+  outline-color: hsl(0 0% 50% / 0.25);
+  outline-offset: 0.5rem;
+}
+
+.char span {
+  filter: blur(calc((1 - var(--active, 0)) * 1rem));
+  transition: filter calc(((1 - var(--active, 0)) + 0.2) * 1s);
+}
+
+.char:is(:hover, :focus-visible) {
+  --active: var(--lerp-0);
+}
+.char:is(:hover, :focus-visible) + .char,
+.char:has(+ .char:is(:hover, :focus-visible)) {
+  --active: var(--lerp-1);
+}
+.char:is(:hover, :focus-visible) + .char + .char,
+.char:has(+ .char + .char:is(:hover, :focus-visible)) {
+  --active: var(--lerp-2);
+}
+.char:is(:hover, :focus-visible) + .char + .char + .char,
+.char:has(+ .char + .char + .char:is(:hover, :focus-visible)) {
+  --active: var(--lerp-3);
+}
+.char:is(:hover, :focus-visible) + .char + .char + .char + .char,
+.char:has(+ .char + .char + .char + .char:is(:hover, :focus-visible)) {
+  --active: var(--lerp-4);
+}
+.char:is(:hover, :focus-visible) + .char + .char + .char + .char + .char,
+.char:has(+ .char + .char + .char + .char + .char:is(:hover, :focus-visible)) {
+  --active: var(--lerp-5);
 }
 
 /* Glass morphism utility */

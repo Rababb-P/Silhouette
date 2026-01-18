@@ -1,0 +1,15 @@
+User Style Preferences:
+
+1. Body Part: head
+   Comment: Bald
+
+2. Body Part: head
+   Comment: Glasses
+
+3. Body Part: torso
+   Comment: Necklace
+
+4. Body Part: torso
+   Comment: Tie
+
+Saved at: 2026-01-18T10:01:34.419Z
