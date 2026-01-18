@@ -121,30 +121,31 @@ YOU MUST PROVIDE ONLY 1 SINGLE OUTFIT. NOT 2, NOT 3 - JUST 1.
 
 Format EXACTLY:
 
-🎯 THE LOOK
+
+THE LOOK
 [One sentence]
 
-✨ KEY PIECES (3-5 items)
-1. [Item] - [Brand]
-   [URL]
 
-2. [Item] - [Brand]
-   [URL]
+KEY PIECES (3-5 items)
+1. [Item] - [Brand] | [URL]
 
-3. [Item] - [Brand]
-   [URL]
+2. [Item] - [Brand] | [URL]
 
-4. [Item] - [Brand]
-   [URL]
+3. [Item] - [Brand] | [URL]
 
-5. [Item] - [Brand]
-   [URL]
+4. [Item] - [Brand] | [URL]
 
-🎨 DESIGNER'S VISION
+5. [Item] - [Brand] | [URL]
+
+
+DESIGNER'S VISION
 [2-3 sentences explaining your creative rationale in an artsy, fashion designer way. Why these pieces? What story do they tell? How do they elevate the wearer's presence?]
 
-💡 STYLING TIP
+
+STYLING TIP
 [One sentence]
+
+IMPORTANT: Add a line break BEFORE each section heading (THE LOOK, KEY PIECES, DESIGNER'S VISION, STYLING TIP) and after each section content.
 
 STOP AFTER THE FIRST OUTFIT. DO NOT CONTINUE.`
 

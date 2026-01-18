@@ -18,5 +18,7 @@ Guidelines:
 - Apply the user's personal preferences to the outfit choice
 - Avoid artifacts, text, watermarks, or extra people
 - Everything in the photo MUST remain identical to the input except clothing/accessories
+- DO NOT INCLUDE Emojis
+- Add a line break before each section 
 
 Use the user's style context (vibe, color preferences, personal preferences) below to guide the outfit transformation.

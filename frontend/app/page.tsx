@@ -6,6 +6,7 @@ import { CameraPreview } from "@/components/silhouette/camera-preview"
 import { StyleVibeSelector } from "@/components/silhouette/style-vibe-selector"
 import { StyleRecommendation } from "@/components/silhouette/style-recommendation"
 import { BodyModel, type Annotation } from "@/components/silhouette/body-model"
+import { Footer } from "@/components/silhouette/footer"
 
 export default function SilhouettePage() {
   const [selectedVibe, setSelectedVibe] = useState<string>("street")
@@ -350,12 +351,15 @@ export default function SilhouettePage() {
               <div className="flex-1 text-base text-white leading-relaxed overflow-y-auto mb-4 min-h-[600px] whitespace-pre-wrap">
                 {textRecommendation ? (
                   textRecommendation.split('\n').map((line, i) => {
+                    // Add extra margin for section headers
+                    const isSectionHeader = /^(THE LOOK|KEY PIECES|DESIGNER'S VISION|STYLING TIP)/.test(line)
+                    
                     // Convert URLs to clickable links - show in brackets
                     const urlRegex = /(https?:\/\/[^\s)\[\]]+)/g
                     const parts = line.split(urlRegex)
                     
                     return (
-                      <div key={i}>
+                      <div key={i} className={isSectionHeader ? "mt-4 font-bold italic" : ""}>
                         {parts.map((part, j) => {
                           if (part.match(urlRegex)) {
                             return (
@@ -412,6 +416,7 @@ export default function SilhouettePage() {
             </div>
           </div>
         </div>
+      <Footer />
       </div>
     </main>
   )
