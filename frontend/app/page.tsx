@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/silhouette/header"
 import { CameraPreview } from "@/components/silhouette/camera-preview"
 import { StyleVibeSelector } from "@/components/silhouette/style-vibe-selector"
@@ -12,6 +12,10 @@ export default function SilhouettePage() {
   const [selectedVibe, setSelectedVibe] = useState<string>("street")
   const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null)
   const [annotations, setAnnotations] = useState<Annotation[]>([])
+  const [captureData, setCaptureData] = useState<any>(null)
+  const [preferences, setPreferences] = useState<{ bodyPart: string, comment: string }[]>([])
+  const [generatedOutfits, setGeneratedOutfits] = useState<any[]>([])
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const handleAddAnnotation = (bodyPart: string, comment: string) => {
     console.log("Adding annotation for body part:", bodyPart, "Comment:", comment)
@@ -57,6 +61,73 @@ export default function SilhouettePage() {
     }
   }
 
+  // Handle capture from camera preview
+  const handleCapture = (data: { snapshot: string, overshootData: any }) => {
+    console.log('Capture received:', data)
+    setCaptureData(data)
+  }
+
+  // Handle preferences saved from body model
+  const handleSavePreferences = (prefs: { bodyPart: string, comment: string }[]) => {
+    console.log('Preferences saved:', prefs)
+    setPreferences(prefs)
+  }
+
+  // Generate recommendations when all data is available
+  const generateRecommendations = async () => {
+    if (!captureData) {
+      alert('Please capture an image first')
+      return
+    }
+
+    setIsGenerating(true)
+
+    try {
+      const response = await fetch('http://localhost:3000/api/recommendation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          styleVibe: selectedVibe,
+          captureId: null, // Will use latest
+          preferencesId: null, // Will use latest
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate recommendations')
+      }
+
+      const data = await response.json()
+      console.log('Recommendations generated:', data)
+
+      // Update generated outfits
+      if (data.generatedImages && data.generatedImages.length > 0) {
+        setGeneratedOutfits(data.generatedImages)
+      }
+
+    } catch (error) {
+      console.error('Failed to generate recommendations:', error)
+      alert('Failed to generate recommendations. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // Auto-generate recommendations when capture and preferences are available
+  useEffect(() => {
+    if (captureData && selectedVibe && selectedVibe !== 'manual') {
+      // Wait a bit for preferences to be saved
+      const timer = setTimeout(() => {
+        generateRecommendations()
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [captureData, selectedVibe, preferences.length])
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -68,6 +139,7 @@ export default function SilhouettePage() {
             <CameraPreview 
               selectedVibe={getSelectedVibe()} 
               selectedItem={getSelectedItem()}
+              onCapture={handleCapture}
             />
           </div>
 
@@ -79,6 +151,7 @@ export default function SilhouettePage() {
               annotations={annotations}
               onAddAnnotation={handleAddAnnotation}
               onRemoveAnnotation={handleRemoveAnnotation}
+              onSavePreferences={handleSavePreferences}
             />
           </div>
         </div>
@@ -99,7 +172,12 @@ export default function SilhouettePage() {
 
           {/* Right Column - Outfit Previews */}
           <div className="lg:col-span-2 h-full">
-            <OutfitPreviews selectedVibe={selectedVibe} />
+            <OutfitPreviews 
+              selectedVibe={selectedVibe} 
+              generatedOutfits={generatedOutfits}
+              isGenerating={isGenerating}
+              onGenerate={generateRecommendations}
+            />
           </div>
         </div>
       </div>

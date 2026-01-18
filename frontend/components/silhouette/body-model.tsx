@@ -25,6 +25,7 @@ interface BodyModelProps {
   annotations?: Annotation[]
   onAddAnnotation?: (bodyPart: string, comment: string) => void
   onRemoveAnnotation?: (id: string) => void
+  onSavePreferences?: (preferences: { bodyPart: string, comment: string }[]) => void
 }
 
 const bodyParts = [
@@ -71,6 +72,7 @@ export function BodyModel({
   annotations = [],
   onAddAnnotation,
   onRemoveAnnotation,
+  onSavePreferences,
 }: BodyModelProps) {
   const [rotation, setRotation] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -172,10 +174,42 @@ export function BodyModel({
     setZoom((prev) => Math.max(prev - 0.1, 0.8))
   }
 
-  const handleSave = () => {
-    // Save logic here - could emit an event or call a callback
-    setIsSaved(true)
-    setTimeout(() => setIsSaved(false), 2000)
+  const handleSave = async () => {
+    try {
+      // Convert annotations to preferences format
+      const preferences = annotations.map(ann => ({
+        bodyPart: ann.bodyPart,
+        comment: ann.comment
+      }))
+
+      // Send to backend
+      const response = await fetch('http://localhost:3000/api/preferences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ preferences }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save preferences')
+      }
+
+      const saved = await response.json()
+      console.log('Preferences saved:', saved)
+
+      // Notify parent component
+      if (onSavePreferences) {
+        onSavePreferences(preferences)
+      }
+
+      // Show success feedback
+      setIsSaved(true)
+      setTimeout(() => setIsSaved(false), 2000)
+    } catch (error) {
+      console.error('Failed to save preferences:', error)
+      alert('Failed to save preferences. Please try again.')
+    }
   }
 
   return (

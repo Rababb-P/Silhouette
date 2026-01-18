@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Camera, CameraOff, Maximize2, RotateCcw, Scan } from "lucide-react"
+import { Camera, CameraOff, Maximize2, RotateCcw, Scan, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -10,20 +10,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+// @ts-ignore - Overshoot SDK types may not be available
 import { RealtimeVision } from '@overshoot/sdk'
 
 interface CameraPreviewProps {
   selectedVibe: string
   selectedItem?: string
+  onCapture?: (data: { snapshot: string, overshootData: any }) => void
 }
 
-export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps) {
+export function CameraPreview({ selectedVibe, selectedItem, onCapture }: CameraPreviewProps) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [lastOvershootData, setLastOvershootData] = useState<any>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const startCamera = async () => {
     try {
@@ -81,7 +86,7 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
       const blob = new Blob(chunksRef.current, { type: 'video/mp4' })
       const videoFile = new File([blob], 'capture.mp4', { type: 'video/mp4' })
 
-      const results = []
+      const results: any[] = []
 
       // Create dynamic prompt based on selections
       const itemLabels = ['shoes', 'tops', 'bottoms']
@@ -116,13 +121,14 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
 
       console.log('Generated prompt:', prompt)
 
+      // Get API key from environment or use backend endpoint
       const vision = new RealtimeVision({
         apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
-        apiKey: 'ovs_cc96a9b34f5fa6805c6579f6f50c9aa0',
+        apiKey: process.env.NEXT_PUBLIC_OVERSHOOT_API_KEY || 'ovs_cc96a9b34f5fa6805c6579f6f50c9aa0',
         prompt: prompt,
         model: 'Qwen/Qwen3-VL-8B-Instruct',
         source: { type: 'video', file: videoFile },
-        onResult: (result) => {
+        onResult: (result: any) => {
           console.log('Realtime result:', result.result)
           results.push(result.result)
         }
@@ -135,7 +141,23 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
           await vision.stop()
           const finalResult = results[results.length - 1] || 'No results'
           console.log('Final analysis result:', finalResult)
-          // Here you can update state or pass to parent component
+          
+          // Try to parse JSON from the result
+          try {
+            let parsedResult = finalResult
+            if (typeof finalResult === 'string') {
+              // Try to extract JSON from string
+              const jsonMatch = finalResult.match(/\{[\s\S]*\}/)
+              if (jsonMatch) {
+                parsedResult = JSON.parse(jsonMatch[0])
+              }
+            }
+            setLastOvershootData(parsedResult)
+          } catch (parseError) {
+            console.error('Failed to parse Overshoot result:', parseError)
+            setLastOvershootData({ text: finalResult })
+          }
+          
           setIsAnalyzing(false)
         }, 5000)
       } catch (error) {
@@ -150,6 +172,68 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
         recorderRef.current.stop()
       }
     }, 2000)
+  }
+
+  const captureSnapshot = async () => {
+    if (!videoRef.current || !isStreaming || !lastOvershootData) {
+      console.warn('Cannot capture: camera not streaming or no Overshoot data')
+      return
+    }
+
+    setIsCapturing(true)
+
+    try {
+      // Create canvas to capture video frame
+      const canvas = canvasRef.current || document.createElement('canvas')
+      canvas.width = videoRef.current.videoWidth
+      canvas.height = videoRef.current.videoHeight
+      
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        throw new Error('Could not get canvas context')
+      }
+
+      // Draw current video frame to canvas
+      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+      
+      // Convert canvas to base64 image
+      const snapshot = canvas.toDataURL('image/png')
+
+      // Prepare data to send
+      const captureData = {
+        snapshot,
+        overshootData: lastOvershootData
+      }
+
+      // Send to backend to save
+      const response = await fetch('http://localhost:3000/api/capture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(captureData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save capture')
+      }
+
+      const savedData = await response.json()
+      console.log('Capture saved:', savedData)
+
+      // Notify parent component
+      if (onCapture) {
+        onCapture(captureData)
+      }
+
+      // Show success feedback
+      alert('Capture saved successfully!')
+    } catch (error) {
+      console.error('Capture failed:', error)
+      alert('Failed to capture. Please try again.')
+    } finally {
+      setIsCapturing(false)
+    }
   }
 
   useEffect(() => {
@@ -263,6 +347,32 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
             </Tooltip>
           </TooltipProvider>
 
+          {/* Capture Button */}
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className={cn(
+                    "h-12 w-12 rounded-full transition-all duration-300",
+                    lastOvershootData 
+                      ? "bg-emerald-600 text-background hover:bg-emerald-700" 
+                      : "bg-background/80 backdrop-blur-sm hover:bg-background"
+                  )}
+                  onClick={captureSnapshot}
+                  disabled={!isStreaming || !lastOvershootData || isCapturing}
+                >
+                  <Save className="h-5 w-5" />
+                  <span className="sr-only">Capture</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="tooltip-content text-foreground">
+                <p>{!lastOvershootData ? "Analyze first" : isCapturing ? "Capturing..." : "Capture snapshot & analysis"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           {isStreaming && (
             <>
               <TooltipProvider delayDuration={200}>
@@ -271,10 +381,10 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
                     <Button
                       variant="secondary"
                       size="icon"
-                      className="h-12 w-12 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300"
+                      className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all duration-300"
                       onClick={stopCamera}
                     >
-                      <CameraOff className="h-5 w-5" />
+                      <CameraOff className="h-4 w-4" />
                       <span className="sr-only">Stop camera</span>
                     </Button>
                   </TooltipTrigger>
@@ -304,6 +414,9 @@ export function CameraPreview({ selectedVibe, selectedItem }: CameraPreviewProps
             </>
           )}
         </div>
+        
+        {/* Hidden canvas for snapshot capture */}
+        <canvas ref={canvasRef} className="hidden" />
       </div>
 
       {/* Camera Switch (for mobile) */}

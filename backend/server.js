@@ -21,8 +21,20 @@ app.use('/api', require('./routes/media'));
 // Style analysis routes
 app.use('/api', require('./routes/style'));
 
+// Capture routes
+app.use('/api', require('./routes/capture'));
+
+// Preferences routes
+app.use('/api', require('./routes/preferences'));
+
+// Recommendation routes
+app.use('/api', require('./routes/recommendations'));
+
 // Items routes
 app.use('/items', require('./routes/items'));
+
+// Serve static files for captures
+app.use('/captures', express.static('captures'));
 
 // Start server
 (async () => {

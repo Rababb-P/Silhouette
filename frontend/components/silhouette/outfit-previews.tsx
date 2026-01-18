@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Play, Pause, Heart, Download, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Play, Pause, Heart, Download, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -10,9 +10,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface OutfitPreviewsProps {
   selectedVibe: string
+  generatedOutfits?: Array<{
+    name: string
+    description: string
+    dataUrl: string
+    items: string[]
+    style: string
+  }>
+  isGenerating?: boolean
+  onGenerate?: () => void
 }
 
 const outfitsByVibe = {
@@ -30,20 +40,38 @@ const outfitsByVibe = {
   ],
 }
 
-export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
+export function OutfitPreviews({ selectedVibe, generatedOutfits = [], isGenerating = false, onGenerate }: OutfitPreviewsProps) {
   const [playingId, setPlayingId] = useState<number | null>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const [likedIds, setLikedIds] = useState<Set<number>>(new Set())
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   
-  const outfits = outfitsByVibe[selectedVibe as keyof typeof outfitsByVibe] || outfitsByVibe.street
+  // Use generated outfits if available, otherwise use default
+  const outfits = generatedOutfits.length > 0 
+    ? generatedOutfits.map((outfit, index) => ({
+        id: `generated-${index}`,
+        name: outfit.name,
+        thumbnail: outfit.dataUrl,
+        description: outfit.description,
+        items: outfit.items,
+        style: outfit.style,
+        duration: null
+      }))
+    : (outfitsByVibe[selectedVibe as keyof typeof outfitsByVibe] || outfitsByVibe.street).map(outfit => ({
+        ...outfit,
+        thumbnail: outfit.thumbnail,
+        description: null,
+        items: [],
+        style: selectedVibe
+      }))
 
-  const toggleLike = (id: number) => {
+  const toggleLike = (id: string | number) => {
+    const idStr = String(id)
     setLikedIds(prev => {
       const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
+      if (next.has(idStr)) {
+        next.delete(idStr)
       } else {
-        next.add(id)
+        next.add(idStr)
       }
       return next
     })
@@ -61,10 +89,28 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 h-full flex flex-col">
       {/* Header */}
       <div className="mb-5">
-        <h2 className="font-serif text-lg text-foreground">AI-Generated Outfits</h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Preview yourself in curated {selectedVibe} looks
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-lg text-foreground">AI-Generated Outfits</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {generatedOutfits.length > 0 
+                ? `Showing ${generatedOutfits.length} generated ${selectedVibe} looks`
+                : `Preview yourself in curated ${selectedVibe} looks`}
+            </p>
+          </div>
+          {onGenerate && generatedOutfits.length === 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onGenerate}
+              disabled={isGenerating}
+              className="gap-2"
+            >
+              <Sparkles className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+              {isGenerating ? "Generating..." : "Generate"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Video Grid */}
@@ -83,14 +129,25 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
             >
               {/* Video Container */}
               <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border/50 bg-muted">
-                {/* Gradient Placeholder / Video */}
-                <div
-                  className={cn(
-                    "absolute inset-0 bg-gradient-to-br transition-all duration-500",
-                    gradientStyles[outfit.thumbnail],
-                    isPlaying && "scale-105"
-                  )}
-                />
+                {/* Generated Image or Gradient Placeholder */}
+                {outfit.thumbnail && outfit.thumbnail.startsWith('data:image') ? (
+                  <img
+                    src={outfit.thumbnail}
+                    alt={outfit.name}
+                    className={cn(
+                      "h-full w-full object-cover transition-all duration-500",
+                      isPlaying && "scale-105"
+                    )}
+                  />
+                ) : (
+                  <div
+                    className={cn(
+                      "absolute inset-0 bg-gradient-to-br transition-all duration-500",
+                      gradientStyles[outfit.thumbnail] || gradientStyles["gradient-1"],
+                      isPlaying && "scale-105"
+                    )}
+                  />
+                )}
 
                 {/* Animated shimmer effect when playing */}
                 {isPlaying && (
@@ -122,10 +179,16 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
                   </div>
                 </button>
 
-                {/* Duration Badge */}
-                <div className="absolute bottom-2 right-2 rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground backdrop-blur-sm">
-                  {outfit.duration}
-                </div>
+                {/* Duration Badge or Description */}
+                {outfit.duration ? (
+                  <div className="absolute bottom-2 right-2 rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground backdrop-blur-sm">
+                    {outfit.duration}
+                  </div>
+                ) : outfit.description ? (
+                  <div className="absolute bottom-2 left-2 right-2 rounded bg-background/90 px-2 py-1.5 text-xs text-foreground backdrop-blur-sm max-h-20 overflow-y-auto">
+                    {outfit.description}
+                  </div>
+                ) : null}
 
                 {/* Action Buttons */}
                 <div
