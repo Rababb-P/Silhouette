@@ -1,4 +1,4 @@
-We utilised Generative AI to build this project (ChatGPT, Github CoPilot, Claude)
+We utilised Generative AI to build this project (ChatGPT, Github CoPilot, Claude, Cursor)
 
 We also utilised Overshoot API and it's docs. 
 
