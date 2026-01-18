@@ -646,8 +646,10 @@ export function BodyModel({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && floatingInputValue.trim()) {
                     // Use floatingBodyPart which was set when the body part was clicked
-                    onAddAnnotation?.(floatingBodyPart || selectedBodyPart, floatingInputValue)
-                    setFloatingInputValue("")
+                    const bodyPart = floatingBodyPart || selectedBodyPart
+                    if (bodyPart && onAddAnnotation) {
+                      onAddAnnotation(bodyPart, floatingInputValue)
+                    }                    setFloatingInputValue("")
                     setFloatingInputMode(false)
                     setClickPosition(null)
                     setFloatingBodyPart(null)
