@@ -12,12 +12,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^1.37.0",
     "@overshoot/sdk": "^0.1.0-alpha.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "file-api": "^0.10.4",
     "mongodb": "^7.0.0",
+    "node": "^25.3.0",
+    "nodemon": "^3.1.11"
     "mongoose": "^9.1.4",
     "multer": "^2.0.2",
     "node": "^25.3.0",

@@ -2,6 +2,7 @@
 require("dotenv").config();
 
 const express = require('express')
+const cors = require('cors')
 const multer = require('multer')
 const cors = require('cors')
 const fs = require('fs')
@@ -18,11 +19,22 @@ app.use(express.json())
 // Configure multer for video upload
 const upload = multer({ dest: 'uploads/' })
 
+//middleware
+app.use(cors())
+app.use(express.json())
+
 //routes
 app.get('/', (req, res) => {
     res.json({mssg: 'Welcome to the app'})
 })
 
+// Media routes
+app.use('/api', require('./routes/media'))
+
+// listen for requests
+app.listen(process.env.PORT, () => {
+    console.log('listening on port ', process.env.PORT )
+})
 app.post('/api/analyze-style', upload.single('video'), async (req, res) => {
     try {
         console.log('Received analyze request')
