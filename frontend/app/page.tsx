@@ -12,6 +12,34 @@ export default function SilhouettePage() {
   const [selectedVibe, setSelectedVibe] = useState<string>("street")
   const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null)
 
+  // Map body parts to item categories for Overshoot API
+  const getSelectedItem = () => {
+    switch (selectedBodyPart) {
+      case "torso":
+        return "tops"
+      case "legs":
+        return "bottoms"
+      case "feet":
+        return "shoes"
+      default:
+        return undefined
+    }
+  }
+
+  // Map style vibes to Overshoot API labels
+  const getSelectedVibe = () => {
+    switch (selectedVibe) {
+      case "street":
+        return "streetwear"
+      case "formal":
+        return "formal"
+      case "sporty":
+        return "active"
+      default:
+        return "formal"
+    }
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -20,7 +48,10 @@ export default function SilhouettePage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Left Column - Camera Preview */}
           <div className="lg:col-span-5">
-            <CameraPreview selectedVibe={selectedVibe} />
+            <CameraPreview 
+              selectedVibe={getSelectedVibe()} 
+              selectedItem={getSelectedItem()}
+            />
           </div>
 
           {/* Center Column - 3D Body Model */}
