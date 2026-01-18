@@ -48,34 +48,124 @@ const downloadVideo = async (file) => {
 }
 
 /**
- * Generate an image using Gemini Imagen API
+ * Generate an image using Gemini Nano Banana API (gemini-2.5-flash-image or gemini-3-pro-image-preview)
  * @param {string} prompt - Text prompt for image generation
- * @param {string} model - Model to use (default: gemini-2.5-flash-image)
- * @param {string} aspectRatio - Aspect ratio
- * @param {string} imageSize - Image size: '1K', '2K', '4K'
+ * @param {string} model - Model to use (default: gemini-3-pro-image-preview - Nano Banana Pro)
+ * @param {string} aspectRatio - Aspect ratio (e.g., '1:1', '16:9', '9:16', '3:2', '2:3', '4:3', '3:4', '4:5', '5:4', '21:9')
+ * @param {string} imageSize - Image size: '1K', '2K', '4K' (only for gemini-3-pro-image-preview)
  * @returns {Promise<Object>} Response object with generated image
  */
-const generateImage = async (prompt, model = 'gemini-2.5-flash-image', aspectRatio = null, imageSize = null) => {
-  const config = {
-    responseModalities: ['Image', 'Text']
-  }
-
-  if (aspectRatio || imageSize) {
-    config.imageConfig = {}
-    if (aspectRatio) config.imageConfig.aspectRatio = aspectRatio
-    if (imageSize) config.imageConfig.imageSize = imageSize
-  }
-
-  return await ai.models.generateContent({
+const generateImage = async (prompt, model = 'gemini-3-pro-image-preview', aspectRatio = null, imageSize = null) => {
+  const requestOptions = {
     model: model,
-    contents: [prompt],
-    config: config
-  })
+    contents: prompt
+  }
+
+  // Add image configuration if aspectRatio or imageSize is provided
+  if (aspectRatio || imageSize) {
+    requestOptions.config = {
+      imageConfig: {}
+    }
+    
+    if (aspectRatio) {
+      requestOptions.config.imageConfig.aspectRatio = aspectRatio
+    }
+    
+    if (imageSize) {
+      // imageSize is only valid for gemini-3-pro-image-preview
+      requestOptions.config.imageConfig.imageSize = imageSize
+    }
+  }
+
+  const response = await ai.models.generateContent(requestOptions)
+  
+  return response
+}
+
+/**
+ * Edit an image using text prompt (text-and-image-to-image)
+ * @param {string} prompt - Text prompt describing the edit
+ * @param {Buffer|string} imageBuffer - Image buffer or base64 string
+ * @param {string} mimeType - MIME type of the image (e.g., 'image/png', 'image/jpeg')
+ * @param {string} model - Model to use (default: gemini-3-pro-image-preview - Nano Banana Pro)
+ * @param {string} aspectRatio - Aspect ratio
+ * @param {string} imageSize - Image size: '1K', '2K', '4K' (only for gemini-3-pro-image-preview)
+ * @returns {Promise<Object>} Response object with generated image
+ */
+const editImage = async (prompt, imageBuffer, mimeType = 'image/png', model = 'gemini-3-pro-image-preview', aspectRatio = null, imageSize = null) => {
+  // Convert image buffer to base64 if needed
+  const imageBase64 = Buffer.isBuffer(imageBuffer) 
+    ? imageBuffer.toString('base64')
+    : imageBuffer
+
+  const requestOptions = {
+    model: model,
+    contents: [
+      {
+        parts: [
+          {
+            inlineData: {
+              data: imageBase64,
+              mimeType: mimeType
+            }
+          },
+          {
+            text: prompt
+          }
+        ]
+      }
+    ]
+  }
+
+  // Add image configuration if aspectRatio or imageSize is provided
+  if (aspectRatio || imageSize) {
+    requestOptions.config = {
+      imageConfig: {}
+    }
+    
+    if (aspectRatio) {
+      requestOptions.config.imageConfig.aspectRatio = aspectRatio
+    }
+    
+    if (imageSize) {
+      // imageSize is only valid for gemini-3-pro-image-preview
+      requestOptions.config.imageConfig.imageSize = imageSize
+    }
+  }
+
+  const response = await ai.models.generateContent(requestOptions)
+  
+  return response
+}
+
+/**
+ * Generate text using Gemini API (standard text-to-text generation)
+ * @param {string} prompt - Text prompt for text generation
+ * @param {string} model - Model to use (default: gemini-2.0-flash-exp)
+ * @param {Object} config - Optional generation config (temperature, maxTokens, etc.)
+ * @returns {Promise<Object>} Response object with generated text
+ */
+const generateText = async (prompt, model = 'gemini-2.0-flash-exp', config = null) => {
+  const requestOptions = {
+    model: model,
+    contents: prompt
+  }
+
+  // Add generation config if provided
+  if (config) {
+    requestOptions.config = config
+  }
+
+  const response = await ai.models.generateContent(requestOptions)
+  
+  return response
 }
 
 module.exports = {
   generateVideoOperation,
   getVideoOperationStatus,
   downloadVideo,
-  generateImage
+  generateImage,
+  editImage,
+  generateText
 }
