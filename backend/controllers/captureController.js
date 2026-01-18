@@ -1,10 +1,57 @@
 const fs = require('fs')
 const path = require('path')
 const mediaModel = require('../models/mediaModel')
+const Item = require('../models/itemModel')
 
 // Directory for saving captured images
 const CAPTURES_DIR = path.join(__dirname, '..', 'captures')
 const PREFERENCES_DIR = path.join(__dirname, '..', 'preferences')
+const PROMPTS_DIR = path.join(__dirname, '..', 'prompts')
+const DEFAULT_IMAGE_PROMPT_PATH = path.join(PROMPTS_DIR, 'gemini_image_base.txt')
+
+function readBaseImagePrompt() {
+  try {
+    if (fs.existsSync(DEFAULT_IMAGE_PROMPT_PATH)) {
+      const prompt = fs.readFileSync(DEFAULT_IMAGE_PROMPT_PATH, 'utf8').trim()
+      if (prompt) return prompt
+    }
+  } catch (error) {
+    console.warn('[GENERATE_PHOTO] Could not read base prompt file, using fallback:', error.message)
+  }
+
+  return 'Generate a stylized fashion photo of the person. Keep their identity, proportions, and features realistic while enhancing style, lighting, and overall quality. Avoid distortions. Use the provided context below to guide the outfit and vibe.'
+}
+
+async function getAvailableItems(overshootData) {
+  try {
+    const color = overshootData?.colour || overshootData?.color || ''
+    const style = overshootData?.style || ''
+    const item = overshootData?.item || ''
+
+    const query = {}
+    if (color) query.color = { $regex: color, $options: 'i' }
+    if (style) query.style = style
+    if (item) query.item = item
+
+    const items = Object.keys(query).length > 0 ? await Item.find(query).limit(15) : await Item.find().limit(15)
+    
+    console.log('[GENERATE_PHOTO] Found', items.length, 'items from database')
+    return items
+  } catch (error) {
+    console.warn('[GENERATE_PHOTO] Could not fetch items from database:', error.message)
+    return []
+  }
+}
+
+function formatItemsForPrompt(items) {
+  if (!items || items.length === 0) {
+    return 'No items available from database.'
+  }
+
+  return items
+    .map((item, idx) => `${idx + 1}. ${item.item} - ${item.color} (${item.style}) - ${item.productLink}`)
+    .join('\n')
+}
 
 // Ensure the captures directory exists
 function ensureCapturesDir() {
@@ -239,9 +286,15 @@ const generatePhotoWithText = async (req, res) => {
     const imageBase64 = imageBuffer.toString('base64')
     console.log('[GENERATE_PHOTO] Image loaded:', imageBuffer.length, 'bytes')
 
+    // Fetch matching items from database
+    console.log('[GENERATE_PHOTO] Fetching items from database...')
+    const dbItems = await getAvailableItems(captureData.overshootData)
+    const itemsText = formatItemsForPrompt(dbItems)
+
     // Combine text files into a prompt for Gemini
     console.log('[GENERATE_PHOTO] Creating prompt from text files...')
-    let prompt = 'Generate a stylized fashion photo based on the following information:\n\n'
+    const basePrompt = readBaseImagePrompt()
+    let prompt = `${basePrompt}\n\n`
     
     if (preferencesText) {
       prompt += 'User Style Preferences:\n'
@@ -255,7 +308,10 @@ const generatePhotoWithText = async (req, res) => {
       prompt += '\n'
     }
 
-    prompt += '\nPlease create a visually appealing fashion photo that incorporates these preferences and analysis. Make it realistic and fashionable while maintaining the person\'s proportions and features.'
+    prompt += `\nAVAILABLE CLOTHING ITEMS FROM DATABASE:\n${itemsText}\n`
+    
+    prompt += '\nIMPORTANT: Choose clothing and accessories ONLY from the list above. Match items by number (e.g., "Use item #3 and item #7"). Include product links from your recommendations in your reasoning.\n'
+    prompt += 'Use the context above to guide the outfit, styling, and vibe while keeping the person realistic and recognizable.'
     
     console.log('[GENERATE_PHOTO] Generated prompt length:', prompt.length, 'characters')
     console.log('[GENERATE_PHOTO] Prompt preview:', prompt.substring(0, 200) + '...')

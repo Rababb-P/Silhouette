@@ -6,6 +6,21 @@ const path = require('path')
 // Directory paths
 const CAPTURES_DIR = path.join(__dirname, '..', 'captures')
 const PREFERENCES_DIR = path.join(__dirname, '..', 'preferences')
+const PROMPTS_DIR = path.join(__dirname, '..', 'prompts')
+const DEFAULT_IMAGE_PROMPT_PATH = path.join(PROMPTS_DIR, 'gemini_image_base.txt')
+
+function readBaseImagePrompt() {
+  try {
+    if (fs.existsSync(DEFAULT_IMAGE_PROMPT_PATH)) {
+      const prompt = fs.readFileSync(DEFAULT_IMAGE_PROMPT_PATH, 'utf8').trim()
+      if (prompt) return prompt
+    }
+  } catch (error) {
+    console.warn('[RECOMMENDATION] Could not read base prompt file, using fallback:', error.message)
+  }
+
+  return 'Generate a stylized fashion photo. Keep the subject\'s identity, proportions, and features realistic while enhancing style, lighting, and overall quality. Avoid distortions.'
+}
 
 /**
  * Generate outfit recommendation using Gemini
@@ -148,8 +163,11 @@ Format your response as JSON:
     for (let i = 0; i < Math.min(recommendations.length, 2); i++) {
       const rec = recommendations[i]
       
-      // Build image generation prompt
-      const imagePrompt = `Transform this person into wearing ${targetStyle} style outfit. 
+      // Build image generation prompt with base prompt
+      const basePrompt = readBaseImagePrompt()
+      const imagePrompt = `${basePrompt}
+
+Transform this person into wearing ${targetStyle} style outfit. 
 Outfit details: ${rec.description || 'stylish outfit'}
 Style: ${targetStyle}
 Make it look realistic and fashionable. Keep the person's face and body proportions the same.`

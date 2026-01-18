@@ -4,6 +4,21 @@ const path = require('path')
 
 // Directory for saving generated media files
 const GENERATED_MEDIA_DIR = path.join(__dirname, '..', 'generated-images')
+const PROMPTS_DIR = path.join(__dirname, '..', 'prompts')
+const DEFAULT_IMAGE_PROMPT_PATH = path.join(PROMPTS_DIR, 'gemini_image_base.txt')
+
+function readBaseImagePrompt() {
+  try {
+    if (fs.existsSync(DEFAULT_IMAGE_PROMPT_PATH)) {
+      const prompt = fs.readFileSync(DEFAULT_IMAGE_PROMPT_PATH, 'utf8').trim()
+      if (prompt) return prompt
+    }
+  } catch (error) {
+    console.warn('[MEDIA] Could not read base prompt file, using fallback:', error.message)
+  }
+
+  return 'Generate a stylized fashion photo. Keep the subject\'s identity, proportions, and features realistic while enhancing style, lighting, and overall quality. Avoid distortions.'
+}
 
 // Ensure the generated media directory exists
 function ensureGeneratedMediaDir() {
@@ -359,7 +374,7 @@ const generateVideoInfo = async (req, res) => {
  */
 const generateImage = async (req, res) => {
   try {
-    const { prompt, model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
+    let { prompt, model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' })
@@ -368,6 +383,10 @@ const generateImage = async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' })
     }
+
+    // Prepend base prompt
+    const basePrompt = readBaseImagePrompt()
+    prompt = `${basePrompt}\n\n${prompt}`
 
     // Generate image using Gemini API
     const response = await mediaModel.generateImage(prompt, model, aspectRatio, imageSize)
@@ -414,7 +433,7 @@ const generateImage = async (req, res) => {
  */
 const generateImageInfo = async (req, res) => {
   try {
-    const { prompt, model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
+    let { prompt, model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' })
@@ -423,6 +442,10 @@ const generateImageInfo = async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' })
     }
+
+    // Prepend base prompt
+    const basePrompt = readBaseImagePrompt()
+    prompt = `${basePrompt}\n\n${prompt}`
 
     const response = await mediaModel.generateImage(prompt, model, aspectRatio, imageSize)
 
@@ -467,7 +490,7 @@ const generateImageInfo = async (req, res) => {
  */
 const editImage = async (req, res) => {
   try {
-    const { prompt, image, mimeType = 'image/png', model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
+    let { prompt, image, mimeType = 'image/png', model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' })
@@ -480,6 +503,10 @@ const editImage = async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' })
     }
+
+    // Prepend base prompt
+    const basePrompt = readBaseImagePrompt()
+    prompt = `${basePrompt}\n\n${prompt}`
 
     // Generate edited image using Gemini API
     const response = await mediaModel.editImage(prompt, image, mimeType, model, aspectRatio, imageSize)
@@ -526,7 +553,7 @@ const editImage = async (req, res) => {
  */
 const editImageInfo = async (req, res) => {
   try {
-    const { prompt, image, mimeType = 'image/png', model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
+    let { prompt, image, mimeType = 'image/png', model = 'gemini-3-pro-image-preview', aspectRatio, imageSize } = req.body
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' })
@@ -539,6 +566,10 @@ const editImageInfo = async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' })
     }
+
+    // Prepend base prompt
+    const basePrompt = readBaseImagePrompt()
+    prompt = `${basePrompt}\n\n${prompt}`
 
     const response = await mediaModel.editImage(prompt, image, mimeType, model, aspectRatio, imageSize)
 
