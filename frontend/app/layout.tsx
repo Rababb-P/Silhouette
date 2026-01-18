@@ -1,36 +1,17 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter, Cormorant_Garamond } from "next/font/google"
+import { Poppins } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-serif",
-  display: "swap",
-})
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-poppins" })
 
 export const metadata: Metadata = {
-  title: "Silhouette | AI-Powered Virtual Try-On",
+  title: "Silhouette",
   description:
     "Experience the future of fashion with AI-powered virtual try-on. See yourself in any outfit instantly.",
   generator: "silhouette",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
+    icon: "/ico.svg",
     apple: "/apple-icon.png",
   },
 }
@@ -47,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
+        className={`${poppins.variable} font-sans antialiased`}
       >
         {children}
       </body>
