@@ -1,6 +1,6 @@
 "use client"
 
-import { Flame, Briefcase, Zap } from "lucide-react"
+import { Flame, Briefcase, Zap, Edit3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Tooltip,
@@ -35,6 +35,13 @@ const vibes = [
     icon: Zap,
     description: "Athletic, dynamic",
     keywords: ["functional", "breathable", "technical", "active"],
+  },
+  {
+    id: "manual",
+    label: "Manual",
+    icon: Edit3,
+    description: "Define your own style",
+    keywords: ["custom", "personal", "unique", "yours"],
   },
 ]
 

@@ -96,11 +96,11 @@ export function BodyModel({
   }
 
   const bodyPartPositions: Record<string, { y: number }> = {
-    head: { y: 55 },
+    head: { y: 70 },
     torso: { y: 145 },
     arms: { y: 140 },
     legs: { y: 275 },
-    feet: { y: 315 },
+    feet: { y: 305 },
   }
 
   const handleAddComment = () => {
@@ -174,7 +174,7 @@ export function BodyModel({
   return (
     <div className="relative flex h-full flex-col rounded-2xl border border-border/50 bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/30 p-4">
+      <div className="flex items-center border-b border-border/30 p-4">
         <div className="flex items-center gap-2">
           <h2 className="font-serif text-lg text-foreground">Body Focus</h2>
           <TooltipProvider delayDuration={200}>
@@ -187,66 +187,6 @@ export function BodyModel({
               </TooltipTrigger>
               <TooltipContent className="tooltip-content max-w-[200px] text-foreground">
                 <p>Click on any body part to get personalized style recommendations for that area.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-1">
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={handleZoomOut}
-                >
-                  <ZoomOut className="h-4 w-4" />
-                  <span className="sr-only">Zoom out</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="tooltip-content text-foreground">
-                <p>Zoom out</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={handleZoomIn}
-                >
-                  <ZoomIn className="h-4 w-4" />
-                  <span className="sr-only">Zoom in</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="tooltip-content text-foreground">
-                <p>Zoom in</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={handleRotate}
-                >
-                  <RotateCw className="h-4 w-4" />
-                  <span className="sr-only">Rotate</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="tooltip-content text-foreground">
-                <p>Rotate view</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -336,7 +276,7 @@ export function BodyModel({
         <div
           className="relative mx-auto h-full w-full max-w-[280px] transition-transform duration-500 ease-out"
           style={{
-            transform: `scale(${zoom}) rotateY(${rotation}deg)`,
+            transform: `rotateY(${rotation}deg)`,
             transformStyle: "preserve-3d",
           }}
         >
@@ -734,69 +674,71 @@ export function BodyModel({
           ))}
         </div>
 
-        {/* Annotation Input Section */}
-        {selectedBodyPart && (
-          <div className="rounded-lg border border-border/50 bg-background/50 p-3">
-            <div className="mb-2 flex items-center gap-2">
-              <div
-                className={cn(
-                  "h-2.5 w-2.5 rounded-full",
-                  bodyPartColors[selectedBodyPart]?.bg || "bg-gray-300"
-                )}
-              />
-              <p className="text-xs font-medium text-foreground">
-                Note for {bodyParts.find((p) => p.id === selectedBodyPart)?.label}
-              </p>
-            </div>
-            {!showAnnotationInput ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAnnotationInput(true)}
-                className="w-full text-xs"
-              >
-                + Note
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Write your styling note..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      handleAddComment()
-                    }
-                  }}
-                  autoFocus
-                  className="flex-1 rounded border border-border/50 bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20"
+        {/* Annotation Input Section - Always reserve space */}
+        <div className="min-h-[88px]">
+          {selectedBodyPart && (
+            <div className="rounded-lg border border-border/50 bg-background/50 p-3">
+              <div className="mb-2 flex items-center gap-2">
+                <div
+                  className={cn(
+                    "h-2.5 w-2.5 rounded-full",
+                    bodyPartColors[selectedBodyPart]?.bg || "bg-gray-300"
+                  )}
                 />
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleAddComment}
-                  disabled={!commentText.trim()}
-                  className="gap-1 px-2"
-                >
-                  <Send className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowAnnotationInput(false)
-                    setCommentText("")
-                  }}
-                  className="px-2"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+                <p className="text-xs font-medium text-foreground">
+                  Note for {bodyParts.find((p) => p.id === selectedBodyPart)?.label}
+                </p>
               </div>
-            )}
-          </div>
-        )}
+              {!showAnnotationInput ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAnnotationInput(true)}
+                  className="w-full text-xs"
+                >
+                  + Note
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Write your styling note..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        handleAddComment()
+                      }
+                    }}
+                    autoFocus
+                    className="flex-1 rounded border border-border/50 bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                  />
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleAddComment}
+                    disabled={!commentText.trim()}
+                    className="gap-1 px-2"
+                  >
+                    <Send className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowAnnotationInput(false)
+                      setCommentText("")
+                    }}
+                    className="px-2"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

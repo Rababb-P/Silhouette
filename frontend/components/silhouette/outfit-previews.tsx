@@ -19,23 +19,14 @@ const outfitsByVibe = {
   street: [
     { id: 1, name: "Urban Oversized", thumbnail: "gradient-1", duration: "0:08" },
     { id: 2, name: "Layered Streetwear", thumbnail: "gradient-2", duration: "0:12" },
-    { id: 3, name: "Graphic Statement", thumbnail: "gradient-3", duration: "0:10" },
-    { id: 4, name: "Sneaker Culture", thumbnail: "gradient-4", duration: "0:09" },
-    { id: 5, name: "Cargo Essential", thumbnail: "gradient-5", duration: "0:11" },
   ],
   formal: [
     { id: 1, name: "Classic Tailored", thumbnail: "gradient-1", duration: "0:10" },
     { id: 2, name: "Modern Minimalist", thumbnail: "gradient-2", duration: "0:08" },
-    { id: 3, name: "Evening Elegance", thumbnail: "gradient-3", duration: "0:12" },
-    { id: 4, name: "Power Suit", thumbnail: "gradient-4", duration: "0:09" },
-    { id: 5, name: "Smart Casual", thumbnail: "gradient-5", duration: "0:11" },
   ],
   sporty: [
     { id: 1, name: "Performance Fit", thumbnail: "gradient-1", duration: "0:09" },
     { id: 2, name: "Athletic Luxe", thumbnail: "gradient-2", duration: "0:11" },
-    { id: 3, name: "Tech Runner", thumbnail: "gradient-3", duration: "0:08" },
-    { id: 4, name: "Gym Ready", thumbnail: "gradient-4", duration: "0:10" },
-    { id: 5, name: "Active Lifestyle", thumbnail: "gradient-5", duration: "0:12" },
   ],
 }
 
@@ -69,35 +60,15 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
   return (
     <div className="rounded-2xl border border-border/50 bg-card p-5">
       {/* Header */}
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="font-serif text-lg text-foreground">AI-Generated Outfits</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Preview yourself in curated {selectedVibe} looks
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          >
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next</span>
-          </Button>
-        </div>
+      <div className="mb-5">
+        <h2 className="font-serif text-lg text-foreground">AI-Generated Outfits</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Preview yourself in curated {selectedVibe} looks
+        </p>
       </div>
 
       {/* Video Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4">
         {outfits.map((outfit) => {
           const isPlaying = playingId === outfit.id
           const isHovered = hoveredId === outfit.id

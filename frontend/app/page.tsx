@@ -34,13 +34,14 @@ export default function SilhouettePage() {
       <Header />
       
       <div className="mx-auto max-w-[1800px] px-4 py-6 lg:px-8">
+        {/* Top Row - Main Panels */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Left Column - Camera Preview */}
+          {/* Left - Camera Preview */}
           <div>
             <CameraPreview selectedVibe={selectedVibe} />
           </div>
 
-          {/* Right Column - Body Model */}
+          {/* Right - Body Model */}
           <div>
             <BodyModel 
               selectedBodyPart={selectedBodyPart}
@@ -52,26 +53,24 @@ export default function SilhouettePage() {
           </div>
         </div>
 
-        {/* Second Row - Style Controls */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-3" />
-          <div className="lg:col-span-4">
+        {/* Bottom Row - Style Controls and Outfit Previews */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          {/* Left Column - Style Controls Stacked */}
+          <div className="flex flex-col gap-6">
             <StyleVibeSelector 
               selectedVibe={selectedVibe} 
               onVibeSelect={setSelectedVibe} 
             />
-          </div>
-          <div className="lg:col-span-5">
             <StyleRecommendation 
               selectedVibe={selectedVibe}
               selectedBodyPart={selectedBodyPart}
             />
           </div>
-        </div>
 
-        {/* Bottom Section - Outfit Video Previews */}
-        <div className="mt-8">
-          <OutfitPreviews selectedVibe={selectedVibe} />
+          {/* Right Column - Outfit Previews */}
+          <div className="lg:col-span-2">
+            <OutfitPreviews selectedVibe={selectedVibe} />
+          </div>
         </div>
       </div>
     </main>
