@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Info, RotateCw, ZoomIn, ZoomOut, X, Send } from "lucide-react"
+import { Info, RotateCw, ZoomIn, ZoomOut, X, Send, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -84,6 +84,7 @@ export function BodyModel({
   const [floatingInputMode, setFloatingInputMode] = useState(false)
   const [floatingInputValue, setFloatingInputValue] = useState("")
   const [floatingBodyPart, setFloatingBodyPart] = useState<string | null>(null)
+  const [isSaved, setIsSaved] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const floatingInputRef = useRef<HTMLInputElement>(null)
 
@@ -171,10 +172,16 @@ export function BodyModel({
     setZoom((prev) => Math.max(prev - 0.1, 0.8))
   }
 
+  const handleSave = () => {
+    // Save logic here - could emit an event or call a callback
+    setIsSaved(true)
+    setTimeout(() => setIsSaved(false), 2000)
+  }
+
   return (
     <div className="relative flex h-full flex-col rounded-2xl border border-border/50 bg-card">
       {/* Header */}
-      <div className="flex items-center border-b border-border/30 p-4">
+      <div className="flex items-center justify-between border-b border-border/30 p-4">
         <div className="flex items-center gap-2">
           <h2 className="font-serif text-lg text-foreground">Body Focus</h2>
           <TooltipProvider delayDuration={200}>
@@ -191,6 +198,32 @@ export function BodyModel({
             </Tooltip>
           </TooltipProvider>
         </div>
+
+        {/* Save Button */}
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isSaved ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "gap-2 transition-all duration-300",
+                  isSaved && "bg-emerald-600 hover:bg-emerald-700"
+                )}
+                onClick={handleSave}
+              >
+                <Check className={cn(
+                  "h-4 w-4 transition-all duration-300",
+                  isSaved && "scale-110"
+                )} />
+                {isSaved ? "Saved" : "Save"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="tooltip-content text-foreground">
+              <p>Lock in your customizations</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* 3D Model Area with Connected Annotations */}
