@@ -106,7 +106,7 @@ export function StyleRecommendation({ selectedVibe, selectedBodyPart }: StyleRec
   // Manual mode - show free text input
   if (selectedVibe === "manual") {
     return (
-      <div className="rounded-2xl border border-border/50 bg-card p-5">
+      <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export function StyleRecommendation({ selectedVibe, selectedBodyPart }: StyleRec
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">

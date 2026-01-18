@@ -58,7 +58,7 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 h-full flex flex-col">
       {/* Header */}
       <div className="mb-5">
         <h2 className="font-serif text-lg text-foreground">AI-Generated Outfits</h2>
@@ -68,7 +68,7 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
       </div>
 
       {/* Video Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex-1 grid grid-cols-2 gap-4 overflow-y-auto">
         {outfits.map((outfit) => {
           const isPlaying = playingId === outfit.id
           const isHovered = hoveredId === outfit.id
@@ -82,7 +82,7 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
               onMouseLeave={() => setHoveredId(null)}
             >
               {/* Video Container */}
-              <div className="relative aspect-[9/16] overflow-hidden rounded-xl border border-border/50 bg-muted">
+              <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border/50 bg-muted">
                 {/* Gradient Placeholder / Video */}
                 <div
                   className={cn(
@@ -196,25 +196,6 @@ export function OutfitPreviews({ selectedVibe }: OutfitPreviewsProps) {
             </div>
           )
         })}
-      </div>
-
-      {/* Generate More Button */}
-      <div className="mt-6 flex justify-center">
-        <Button
-          variant="outline"
-          className="gap-2 border-border/50 bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-300"
-        >
-          <svg
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.636 5.636l2.122 2.121m8.485 8.486l2.121 2.121M5.636 18.364l2.122-2.121m8.485-8.486l2.121-2.121" />
-          </svg>
-          Generate More Looks
-        </Button>
       </div>
     </div>
   )

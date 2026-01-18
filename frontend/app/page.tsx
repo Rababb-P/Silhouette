@@ -68,7 +68,7 @@ export default function SilhouettePage() {
           </div>
 
           {/* Right Column - Outfit Previews */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 h-full">
             <OutfitPreviews selectedVibe={selectedVibe} />
           </div>
         </div>

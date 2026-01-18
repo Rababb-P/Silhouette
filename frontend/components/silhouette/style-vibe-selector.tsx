@@ -47,7 +47,7 @@ const vibes = [
 
 export function StyleVibeSelector({ selectedVibe, onVibeSelect }: StyleVibeSelectorProps) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-serif text-lg text-foreground">Style Vibe</h2>
         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
@@ -104,7 +104,7 @@ export function StyleVibeSelector({ selectedVibe, onVibeSelect }: StyleVibeSelec
                     <div
                       className={cn(
                         "h-2 w-2 rounded-full transition-all duration-300",
-                        isSelected ? "bg-foreground scale-100" : "bg-muted-foreground/30 scale-75 group-hover:scale-100"
+                        isSelected ? "bg-emerald-500 scale-100" : "bg-muted-foreground/30 scale-75 group-hover:scale-100"
                       )}
                     />
 
