@@ -1,8 +1,14 @@
-# Silhouette 👗✨
+# Silhouette (Acquired)👗✨
 
 ## 🎬 Demo
 
-[![Watch the demo](https://img.youtube.com/vi/Msyh6SsYRC4/maxresdefault.jpg)](https://www.youtube.com/watch?v=Msyh6SsYRC4)
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=Msyh6SsYRC4">
+    <img src="https://img.youtube.com/vi/Msyh6SsYRC4/maxresdefault.jpg" alt="Silhouette Demo Video" width="800"/>
+  </a>
+  <br/>
+  <strong>Click the image above to watch the demo on YouTube</strong>
+</div>
 
 ## 💡 Inspiration
 
