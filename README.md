@@ -1,71 +1,81 @@
-# Silhouette
+# Silhouette 👗✨
 
-## Inspiration
+## 🎬 Demo
 
-Ever stood in front of your closet for 30 minutes, trying on outfit after outfit, only to end up wearing the same thing you always wear? We've all been there. We wanted to create a magic mirror that doesn't just show you what you look like — but shows you what you *could* look like. Think of it as having a personal stylist powered by AI, available 24/7, who never judges your questionable fashion choices.
+[![Watch the demo](https://img.youtube.com/vi/Msyh6SsYRC4/maxresdefault.jpg)](https://www.youtube.com/watch?v=Msyh6SsYRC4)
 
-## What it does
+## 💡 Inspiration
 
-**Silhouette** is your AI-powered fashion advisor. Here's how it works:
+Ever stood in front of your closet for 30 minutes, trying on outfit after outfit, only to end up wearing the same thing? We've all been there. We wanted to create a magic mirror that shows you what you *could* look like — a personal AI stylist available 24/7.
 
-1. **Snap a selfie** using the live camera preview
-2. **Click on your body** to tell us what you want to change (hate those pants? Click on 'em!)
-3. **Pick your vibe** — Streetwear, Formal, or Sporty
-4. **Let AI work its magic** — Overshoot analyzes your photo, reads your style preferences, finds improvements and Gemini generates a stunning visualization of your new look
-5. **Shop the look** — Get clickable links to actual products that match your recommended outfit
+## 🎯 What it does
 
-It's like a fitting room that exists in the future... but you can use it today, from your couch, in your pajamas.
+**Silhouette** is your AI-powered fashion advisor:
 
-## How we built it
+1. 📸 **Snap a selfie** using the live camera preview
+2. 🎯 **Click on your body** to specify what you want to change
+3. 🎨 **Pick your vibe** — Streetwear, Formal, or Sporty
+4. 🤖 **Let AI work its magic** — Overshoot analyzes your photo, reads your preferences, and Gemini generates a stunning visualization
+5. 🛒 **Shop the look** — Get clickable links to actual products
 
-We assembled the ultimate tech stack:
+## 🛠️ How we built it
 
-- **Frontend**: Next.js 16 + React 19 with a modern UI built on Radix UI components and Tailwind CSS
-- **Backend**: Express.js on Node.js, connected to MongoDB Atlas for storing fashion data
-- **AI Brains**: 
-  - **Google Gemini** for image generation and style recommendations
-  - **Overshoot SDK** for real-time video analysis (it literally watches your outfit and understands it)
-- **The Glue**: Custom prompt engineering to make the AI understand fashion (teaching robots about drip is harder than it sounds)
+- **Frontend**: Next.js 16 + React 19 with Radix UI and Tailwind CSS
+- **Backend**: Express.js + Node.js + MongoDB Atlas
+- **AI**: 
+  - Google Gemini for image generation and recommendations
+  - Overshoot SDK for real-time video analysis
+- **Custom prompt engineering** to make AI understand fashion
 
-## Challenges we ran into
+## 🚧 Challenges
 
-- **Getting AI to understand fashion** — Teaching an AI the difference between "streetwear" and "trying too hard" is... complicated
-- **Real-time video analysis** — Processing live camera feeds without melting our laptops
-- **The "uncanny valley" of fashion photos** — Making AI-generated outfit visualizations look realistic and not like a fever dream
-- **Rate limits** — When you're generating outfit after outfit, Gemini's quota becomes your nemesis
-- **Cross-browser compatibility** — Some browsers just don't want you to look good (looking at you, Safari captureStream)
+- Teaching AI the difference between "streetwear" and "trying too hard"
+- Real-time video processing without melting laptops
+- Making AI-generated fashion photos look realistic
+- Rate limits when generating multiple outfits
+- Cross-browser compatibility issues
 
-## Accomplishments that we're proud of
+## 🏆 Accomplishments
 
-- Built a fully functional AI fashion advisor in a hackathon timeframe
-- Created a beautiful, intuitive UI that makes body annotation actually fun
-- Integrated multiple AI services seamlessly (Overshoot + Gemini working together)
-- Made AI-generated fashion photos that people actually want to wear
-- Connected real shopping links so you can actually buy the recommended fits
-- The "Find Yourself" landing animation turned out great
+- ✅ Fully functional AI fashion advisor built in hackathon timeframe
+- ✅ Beautiful, intuitive UI for body annotation
+- ✅ Seamless integration of multiple AI services (Overshoot + Gemini)
+- ✅ AI-generated fashion photos people actually want to wear
+- ✅ Real shopping links integrated
+- ✅ Polished "Find Yourself" landing animation
 
-## What we learned
+## 📚 What we learned
 
-- AI image generation has come incredibly far — we're living in the future
-- Prompt engineering is an art form (and sometimes a comedy of errors)
-- Real-time video processing in the browser is both powerful and terrifying
-- Building with multiple AI APIs requires serious orchestration skills
-- Fashion is subjective, but good UX is universal
-- Sleep is optional during hackathons, coffee is not
+- AI image generation has come incredibly far
+- Prompt engineering is an art form
+- Real-time video processing is powerful but challenging
+- Building with multiple AI APIs requires serious orchestration
+- Good UX is universal, even when fashion is subjective
 
-## What's next for Silhouette
+## 🚀 What's next
 
-- **Social features** — Share your AI-generated looks with friends and get votes
-- **More style vibes** — Cottagecore, Y2K, Dark Academia, and more aesthetics
-- **Mobile app** — Fashion advice on the go
-- **Direct checkout integration** — One-click to purchase
-- **Video try-on** — See how the outfit looks when you move
-- **Wardrobe integration** — Upload your existing clothes and get AI-powered outfit combos
-- **Brand partnerships** — Connect with fashion retailers for exclusive recommendations
+- 👥 Social features — Share looks and get votes
+- 🎨 More style vibes — Cottagecore, Y2K, Dark Academia
+- 📱 Mobile app
+- 💳 Direct checkout integration
+- 🎥 Video try-on
+- 🧵 Wardrobe integration
+- 🤝 Brand partnerships
 
-*Because everyone deserves to feel like the main character.*
-We utilised Generative AI to build this project (ChatGPT, Github CoPilot, Claude, Cursor)
+*Because everyone deserves to feel like the main character.* 🌟
 
-We also utilised Overshoot API and it's docs. 
+---
 
-Our main IDE in this project was DevSwarm! Using their parrallel AI agent workflows, we were able to get multiple branches of our intial site (frontend, backend) working at once with different AI agents. We then later used DevSwarms multiple workflows to create different reasoning versions of our AI agent and tested to find the best version! Overall, DevSwarm was vital to our project and workflow.
+## 🤖 AI Tools Used
+
+We utilized Generative AI to build this project:
+- ChatGPT
+- GitHub Copilot
+- Claude
+- Cursor
+
+We also utilized the [Overshoot API](https://overshoot.ai) and its documentation.
+
+## 🚀 DevSwarm
+
+Our main IDE was **DevSwarm**! Using their parallel AI agent workflows, we were able to work on multiple branches (frontend, backend) simultaneously with different AI agents. We also used DevSwarm's multiple workflows to create different reasoning versions of our AI agent and tested to find the best version. DevSwarm was vital to our project and workflow.
